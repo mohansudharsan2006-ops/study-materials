@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash
-import pymysql
+import psycopg2
 import os
 from werkzeug.utils import secure_filename
 
@@ -11,14 +11,9 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'txt', 'jpg', 'png', '
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# MySQL Connection
-db = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="root123",
-    database="study_material_db",
-    cursorclass=pymysql.cursors.DictCursor
-)
+# Postgres/Neon Connection
+DATABASE_URL = os.environ.get("DATABASE_URL")
+db = psycopg2.connect(DATABASE_URL)
 
 # HOME PAGE
 @app.route("/")
@@ -26,15 +21,15 @@ def index():
 
     cursor = db.cursor()
 
-    cursor.execute("SELECT COUNT(*) AS total_notes FROM notes")
-    notes = cursor.fetchone()["total_notes"]
+    cursor.execute("SELECT COUNT(*) FROM notes")
+    notes = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) AS total_users FROM users")
-    users = cursor.fetchone()["total_users"]
+    cursor.execute("SELECT COUNT(*) FROM users")
+    users = cursor.fetchone()[0]
 
-    cursor.execute("SELECT SUM(downloads) AS total_downloads FROM notes")
+    cursor.execute("SELECT SUM(downloads) FROM notes")
     result = cursor.fetchone()
-    downloads = result["total_downloads"] if result["total_downloads"] else 0
+    downloads = result[0] if result[0] else 0
 
     return render_template(
         "index.html",
@@ -266,3 +261,14 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
+ 
+    from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Study Materials API Running 🚀"
+
+# IMPORTANT
+handler = app
