@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="register-container">
+    <div class="auth-box">
+        <div class="auth-header">
+            <div class="icon">📘</div>
+            <h2>Register</h2>
+            <p>Join our community and start sharing knowledge</p>
+        </div>
+
+        <form method="POST" action="/register" class="auth-form">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password" placeholder="Password (Min 8 characters)" required>
+            <input type="password" name="password_confirm"  id="password_confirm" placeholder="Confirm Password" required>
+            
+
+            <button type="submit" class="auth-btn">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login">Log in here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
