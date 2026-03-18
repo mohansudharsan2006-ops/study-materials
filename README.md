@@ -3,7 +3,7 @@
 ![StudyHub](https://img.shields.io/badge/StudyHub-v1.0-blue)
 ![Python](https://img.shields.io/badge/Python-3.7+-green)
 ![Flask](https://img.shields.io/badge/Flask-3.0+-blue)
-![SQLite](https://img.shields.io/badge/Database-SQLite-informational)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)
 ![Bootstrap](https://img.shields.io/badge/UI-Bootstrap%205-purple)
 
 ## 📋 Table of Contents
@@ -92,12 +92,13 @@ StudyHub is a comprehensive, advanced learning management system (LMS) that tran
 | Component | Technology |
 |-----------|-----------|
 | **Backend** | Flask (Python 3.7+) |
-| **Database** | SQLite 3 (upgradeable to PostgreSQL/MySQL) |
+| **Database** | PostgreSQL 12+ (production-grade) |
+| **Database Driver** | psycopg2-binary (PostgreSQL adapter) |
 | **Frontend** | HTML5, CSS3, JavaScript |
 | **UI Framework** | Bootstrap 5 |
 | **Icons** | Bootstrap Icons |
-| **ORM** | SQLite3 native + Row Factory |
-| **Authentication** | Session-based with hashing |
+| **Authentication** | Session-based with SHA256 hashing |
+| **Configuration** | python-dotenv (environment variables) |
 | **File Upload** | Werkzeug with validation |
 
 ---
@@ -107,45 +108,79 @@ StudyHub is a comprehensive, advanced learning management system (LMS) that tran
 ### Prerequisites
 ```
 - Python 3.7 or higher
+- PostgreSQL 12 or higher
 - pip (Python package manager)
 - Git (optional)
 ```
 
 ### Step-by-Step Setup
 
-1. **Clone or Download Project**
-```bash
-cd f:\study materials
-```
+1. **Install PostgreSQL**
+   - Download: https://www.postgresql.org/download/windows/
+   - Run installer, remember the superuser password
+   - See [INSTALL_POSTGRESQL.md](INSTALL_POSTGRESQL.md) for detailed instructions
 
-2. **Create Virtual Environment** (if not already done)
-```bash
-python -m venv venv
-```
+2. **Create Database and User**
+   ```sql
+   CREATE DATABASE study_materials;
+   CREATE USER studyhub WITH PASSWORD 'secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE study_materials TO studyhub;
+   ```
 
-3. **Activate Virtual Environment**
-```bash
-# Windows
-.\venv\Scripts\Activate.ps1
+3. **Clone or Download Project**
+   ```bash
+   cd f:\study materials
+   ```
 
-# macOS/Linux
-source venv/bin/activate
-```
+4. **Create Virtual Environment** (if not already done)
+   ```bash
+   python -m venv venv
+   ```
 
-4. **Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
+5. **Activate Virtual Environment**
+   ```bash
+   # Windows
+   .\venv\Scripts\Activate.ps1
+   
+   # macOS/Linux
+   source venv/bin/activate
+   ```
 
-5. **Run the Application**
-```bash
-python api/app.py
-```
+6. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-6. **Access the Platform**
-```
-Open browser and go to: http://localhost:5000
-```
+7. **Configure Database Connection**
+   - Edit `.env` file with your PostgreSQL credentials:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=study_materials
+   DB_USER=studyhub
+   DB_PASSWORD=your_secure_password
+   ```
+
+8. **Run the Application**
+   ```bash
+   python api/app.py
+   ```
+   Expected output:
+   ```
+   ✓ Database initialized successfully
+   Running on http://127.0.0.1:5000
+   ```
+
+9. **Access the Platform**
+   ```
+   Open browser: http://localhost:5000
+   Register → Log in → Explore!
+   ```
+
+### Quick Reference
+- **Documentation**: See [INSTALL_POSTGRESQL.md](INSTALL_POSTGRESQL.md) for detailed PostgreSQL setup
+- **Troubleshooting**: See [POSTGRES_CONNECTION.md](POSTGRES_CONNECTION.md)
+- **Full Setup Guide**: See [POSTGRESQL_SETUP.md](POSTGRESQL_SETUP.md)
 
 ---
 
