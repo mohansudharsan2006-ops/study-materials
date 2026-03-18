@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade Submission - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4"><i class="bi bi-pencil-square"></i> Grade Submission</h1>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Assignment</h5>
+                    <p><strong>Course:</strong> {{ submission.course_name }}</p>
+                    <p><strong>Student:</strong> {{ submission.student_name }}</p>
+                    <p><strong>Total Points:</strong> {{ submission.total_points }}</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Student Submission</h5>
+                    <p class="card-text">{{ submission.submission_text or 'No text submission' }}</p>
+                    {% if submission.file_url %}
+                    <p>
+                        <strong>Attachment:</strong>
+                        <a href="/uploads/{{ submission.file_url }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Download
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="score" class="form-label">Score</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="score" name="score" 
+                               min="0" max="{{ submission.total_points }}" 
+                               value="{% if submission.score %}{{ submission.score }}{% endif %}" required>
+                        <span class="input-group-text">/ {{ submission.total_points }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="feedback" class="form-label">Feedback</label>
+                    <textarea class="form-control" id="feedback" name="feedback" rows="5" placeholder="Provide detailed feedback for the student...">{% if submission.feedback %}{{ submission.feedback }}{% endif %}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Submit Grade
+                </button>
+                <a href="/assignment/{{ submission.assignment_id }}/submissions" class="btn btn-outline-secondary btn-lg">
+                    Back
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

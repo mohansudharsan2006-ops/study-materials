@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Submissions - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <h1 class="mb-4"><i class="bi bi-list-check"></i> Student Submissions</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ assignment.title }}</h5>
+            <p class="card-text">{{ assignment.description }}</p>
+        </div>
+    </div>
+
+    {% if submissions %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Student</th>
+                    <th>Submitted</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td><strong>{{ submission.student_name }}</strong></td>
+                    <td>{{ submission.submitted_at }}</td>
+                    <td>
+                        {% if submission.score %}
+                            <span class="badge bg-success">{{ submission.score }}/{{ assignment.total_points }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/submission/{{ submission.id }}/grade" class="btn btn-sm btn-primary">
+                            {% if submission.score %}View{% else %}Grade{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No submissions yet.
+        </div>
+    {% endif %}
+
+    <a href="/course/{{ assignment.course_id }}/assignments" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Assignments
+    </a>
+</div>
+{% endblock %}

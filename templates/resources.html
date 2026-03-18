@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Resources - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-1"><i class="bi bi-file-earmark"></i> Study Resources</h1>
+            <p class="text-muted">Browse and download study materials</p>
+        </div>
+        {% if session.role in ['teacher', 'admin'] %}
+        <div class="col-md-4 text-md-end">
+            <a href="/upload-resource" class="btn btn-success">
+                <i class="bi bi-upload"></i> Upload Resource
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if resources %}
+    <div class="row">
+        {% for resource in resources %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="mb-2">
+                        {% if resource.resource_type == 'pdf' %}
+                            <i class="bi bi-file-pdf text-danger display-6"></i>
+                        {% elif resource.resource_type == 'video' %}
+                            <i class="bi bi-film text-primary display-6"></i>
+                        {% elif resource.resource_type == 'document' %}
+                            <i class="bi bi-file-text text-info display-6"></i>
+                        {% elif resource.resource_type == 'image' %}
+                            <i class="bi bi-image text-success display-6"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark display-6"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    {% if resource.subject_name %}
+                    <p class="card-text text-muted small">Subject: {{ resource.subject_name }}</p>
+                    {% endif %}
+                    <p class="card-text small">{{ resource.description[:100] }}...</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-download"></i> {{ resource.downloads }} downloads
+                        </small>
+                        <a href="/uploads/{{ resource.file_path }}" class="btn btn-sm btn-primary" download>
+                            Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No resources available yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

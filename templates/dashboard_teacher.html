@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-1"><i class="bi bi-speedometer2"></i> Teacher Dashboard</h1>
+            <p class="text-muted">Manage your courses and students</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="/create-course" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Create Course
+            </a>
+        </div>
+    </div>
+
+    <!-- My Courses -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-3"><i class="bi bi-book"></i> My Courses ({{ courses | length }})</h3>
+            {% if courses %}
+                <div class="row">
+                    {% for course in courses %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name }}</h5>
+                                <p class="card-text text-muted">{{ course.code }}</p>
+                                <p class="card-text">{{ course.description[:80] }}...</p>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted">Enrolled Students</small>
+                                        <div class="h5">{{ course.enrolled_students }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Capacity</small>
+                                        <div class="h5">{{ course.capacity }}</div>
+                                    </div>
+                                </div>
+
+                                <a href="/course/{{ course.id }}" class="btn btn-sm btn-primary me-2">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="/course/{{ course.id }}/assignments" class="btn btn-sm btn-secondary">
+                                    <i class="bi bi-file-earmark"></i> Assignments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You haven't created any courses yet.
+                    <a href="/create-course" class="alert-link">Create your first course</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pending Submissions to Grade -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-3"><i class="bi bi-checklist"></i> Submissions to Grade</h3>
+            {% if pending_submissions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Assignment</th>
+                                <th>Course</th>
+                                <th>Submitted</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in pending_submissions %}
+                            <tr>
+                                <td><strong>{{ submission.student_name }}</strong></td>
+                                <td>{{ submission.assignment_title }}</td>
+                                <td>{{ submission.course_name }}</td>
+                                <td><small>{{ submission.submitted_at }}</small></td>
+                                <td>
+                                    <a href="/submission/{{ submission.id }}/grade" class="btn btn-sm btn-primary">
+                                        Grade
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> No pending submissions!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

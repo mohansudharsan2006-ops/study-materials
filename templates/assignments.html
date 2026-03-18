@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Assignments - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container-lg my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-1"><i class="bi bi-clipboard-check"></i> Assignments</h1>
+            <p class="text-muted">{{ course.name }}</p>
+        </div>
+        {% if is_teacher %}
+        <div class="col-md-4 text-md-end">
+            <a href="/create-assignment/{{ course.id }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Create Assignment
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if assignments %}
+   <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Due Date</th>
+                    <th>Points</th>
+                    {% if is_teacher %}
+                    <th>Submissions</th>
+                    <th>Graded</th>
+                    {% endif %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td><strong>{{ assignment.title }}</strong></td>
+                    <td>{{ assignment.due_date }}</td>
+                    <td>{{ assignment.total_points }}</td>
+                    {% if is_teacher %}
+                    <td>{{ assignment.submission_count }}</td>
+                    <td>{{ assignment.graded_count }}</td>
+                    {% endif %}
+                    <td>
+                        {% if is_teacher %}
+                            <a href="/assignment/{{ assignment.id }}/submissions" class="btn btn-sm btn-primary">
+                                View Submissions
+                            </a>
+                        {% else %}
+                            <a href="/assignment/{{ assignment.id }}/submit" class="btn btn-sm btn-primary">
+                                Submit
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No assignments yet.
+        </div>
+    {% endif %}
+
+    <a href="/course/{{ course.id }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Course
+    </a>
+</div>
+{% endblock %}
