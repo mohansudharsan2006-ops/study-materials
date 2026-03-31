@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Add Topic{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 animate-fade-in">
+                <div class="card-header bg-gradient-info text-white position-relative overflow-hidden">
+                    <div class="bg-pattern"></div>
+                    <h5 class="mb-0 position-relative z-index-1">
+                        <i class="fas fa-plus me-2"></i>Create New Topic
+                    </h5>
+                    {% if subject %}
+                    <small class="position-relative z-index-1 d-block mt-1">
+                        <i class="fas fa-book me-1"></i>Subject: {{ subject['name'] }} ({{ subject['code'] }})
+                    </small>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    {% if session.get('role') not in ['teacher', 'admin'] %}
+                        <div class="alert alert-warning animate-slide-up" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Access Restricted:</strong> Only teachers can create topics.
+                        </div>
+                    {% else %}
+                        <form method="POST" id="addTopicForm" class="animate-slide-up">
+                            <div class="mb-4">
+                                <label for="name" class="form-label fw-bold">
+                                    <i class="fas fa-heading me-1 text-info"></i>Topic Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg animate-input-focus" id="name" name="name"
+                                       placeholder="e.g., Chapter 1: Introduction to Algebra" required>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>Clear and descriptive name for the topic
+                                </small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="description" class="form-label fw-bold">
+                                    <i class="fas fa-align-left me-1 text-info"></i>Description
+                                </label>
+                                <textarea class="form-control animate-input-focus" id="description" name="description"
+                                          rows="4" placeholder="Describe what this topic covers, learning objectives, key concepts..."></textarea>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-lightbulb me-1"></i>Help students understand the scope and content of this topic
+                                </small>
+                            </div>
+
+                            <div class="alert alert-info animate-fade-in" role="alert">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-layer-group me-2"></i>Topic Organization Tips:
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li><i class="fas fa-check text-success me-1"></i>Break down subjects into logical units</li>
+                                            <li><i class="fas fa-check text-success me-1"></i>Use clear, descriptive names</li>
+                                            <li><i class="fas fa-check text-success me-1"></i>Include chapter/section numbers</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li><i class="fas fa-check text-success me-1"></i>Keep topics focused and manageable</li>
+                                            <li><i class="fas fa-check text-success me-1"></i>Add resources after creating topics</li>
+                                            <li><i class="fas fa-check text-success me-1"></i>Organize in learning sequence</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <button type="submit" class="btn btn-info btn-lg px-4 animate-btn-hover">
+                                    <i class="fas fa-plus me-2"></i>Create Topic
+                                </button>
+                                <a href="/topics/{{ subject['id'] }}" class="btn btn-outline-secondary btn-lg px-4 animate-btn-hover">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="mt-5 pt-4 border-top border-light animate-fade-in">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-rocket text-info me-2"></i>Next Steps:
+                            </h6>
+                            <div class="alert alert-light border">
+                                <p class="mb-2"><strong>After creating this topic, you can:</strong></p>
+                                <ul class="mb-0 small">
+                                    <li><i class="fas fa-link text-primary me-1"></i>Add links to study resources</li>
+                                    <li><i class="fas fa-upload text-success me-1"></i>Upload PDF documents and files</li>
+                                    <li><i class="fas fa-video text-danger me-1"></i>Share YouTube videos and tutorials</li>
+                                    <li><i class="fas fa-sticky-note text-warning me-1"></i>Create study notes and guides</li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    }
+
+    .bg-pattern {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+
+    .z-index-1 {
+        z-index: 1;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animate-input-focus:focus {
+        animation: inputFocus 0.3s ease-out;
+    }
+
+    .animate-btn-hover:hover {
+        animation: btnHover 0.2s ease-out;
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes inputFocus {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes btnHover {
+        from { transform: translateY(0); }
+        to { transform: translateY(-2px); }
+    }
+
+    .card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .form-control:focus {
+        border-color: #17a2b8;
+        box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    .alert-info {
+        border-left: 4px solid #17a2b8;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        border: none;
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(135deg, #138496 0%, #0e6b7a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+    }
+
+    .alert-light {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation enhancement
+    const form = document.getElementById('addTopicForm');
+    form.addEventListener('submit', function(e) {
+        const name = document.getElementById('name').value.trim();
+
+        if (!name) {
+            e.preventDefault();
+            alert('Please enter a topic name');
+            return;
+        }
+
+        // Show loading state on submit button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Topic...';
+        submitBtn.disabled = true;
+    });
+
+    // Auto-focus first input
+    document.getElementById('name').focus();
+});
+</script>
+{% endblock %}

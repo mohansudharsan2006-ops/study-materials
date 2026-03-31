@@ -256,7 +256,9 @@ def init_db():
         if conn:
             conn.rollback()
         print(f"Database initialization error: {e}")
-        raise
+        print("WARNING: PostgreSQL connection failed. App will run but database features unavailable.")
+        print("See INSTALL_POSTGRESQL.md to set up PostgreSQL.")
+        # Don't raise - allow app to continue without database
     finally:
         if cur:
             cur.close()
@@ -1050,6 +1052,259 @@ def upload_resource():
     return render_template('upload_resource.html', subjects=subjects)
 
 # ======================================
+# SUBJECTS ROUTES
+# ======================================
+
+@app.route('/subjects')
+def view_subjects():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('SELECT * FROM subjects ORDER BY name')
+        subjects = cur.fetchall()
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('subjects.html', subjects=subjects)
+
+@app.route('/add-subject', methods=['GET', 'POST'])
+@check_teacher_required
+def add_subject():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        code = request.form.get('code', '').strip()
+        description = request.form.get('description', '').strip()
+        department_id = request.form.get('department_id')
+        
+        if not name or not code:
+            flash('Name and code are required', 'danger')
+            return redirect('/add-subject')
+        
+        conn = None
+        cur = None
+        try:
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute(
+                'INSERT INTO subjects (name, code, description, department_id) VALUES (%s, %s, %s, %s)',
+                (name, code, description, department_id)
+            )
+            conn.commit()
+            flash('Subject added successfully!', 'success')
+            return redirect('/subjects')
+        except psycopg2.IntegrityError:
+            if conn:
+                conn.rollback()
+            flash('Subject code already exists', 'danger')
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
+    
+    # Get departments for the form
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('SELECT * FROM departments ORDER BY name')
+        departments = cur.fetchall()
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('add_subject.html', departments=departments)
+
+@app.route('/subject/<int:subject_id>')
+def view_subject(subject_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('SELECT * FROM subjects WHERE id = %s', (subject_id,))
+        subject = cur.fetchone()
+        
+        if not subject:
+            flash('Subject not found', 'danger')
+            return redirect('/subjects')
+        
+        # Get topics for this subject
+        cur.execute('SELECT * FROM topics WHERE subject_id = %s ORDER BY name', (subject_id,))
+        topics = cur.fetchall()
+        
+        # Get resources for this subject
+        cur.execute('''
+            SELECT r.*, u.name as uploaded_by_name
+            FROM resources r
+            LEFT JOIN users u ON r.uploaded_by = u.id
+            WHERE r.subject_id = %s
+            ORDER BY r.created_at DESC
+        ''', (subject_id,))
+        resources = cur.fetchall()
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('subject_detail.html', subject=subject, topics=topics, resources=resources)
+
+# ======================================
+# TOPICS ROUTES
+# ======================================
+
+@app.route('/topics/<int:subject_id>')
+def view_topics(subject_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('SELECT * FROM subjects WHERE id = %s', (subject_id,))
+        subject = cur.fetchone()
+        
+        if not subject:
+            flash('Subject not found', 'danger')
+            return redirect('/subjects')
+        
+        cur.execute('SELECT * FROM topics WHERE subject_id = %s ORDER BY name', (subject_id,))
+        topics = cur.fetchall()
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('topics_list.html', subject=subject, topics=topics)
+
+@app.route('/add-topic/<int:subject_id>', methods=['GET', 'POST'])
+@check_teacher_required
+def add_topic(subject_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('SELECT * FROM subjects WHERE id = %s', (subject_id,))
+        subject = cur.fetchone()
+        
+        if not subject:
+            flash('Subject not found', 'danger')
+            return redirect('/subjects')
+        
+        if request.method == 'POST':
+            name = request.form.get('name', '').strip()
+            description = request.form.get('description', '').strip()
+            
+            if not name:
+                flash('Topic name is required', 'danger')
+                return redirect(f'/add-topic/{subject_id}')
+            
+            cur.execute(
+                'INSERT INTO topics (name, subject_id, description) VALUES (%s, %s, %s)',
+                (name, subject_id, description)
+            )
+            conn.commit()
+            flash('Topic added successfully!', 'success')
+            return redirect(f'/topics/{subject_id}')
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('add_topic.html', subject=subject)
+
+@app.route('/topic/<int:topic_id>')
+def view_topic(topic_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT t.*, s.name as subject_name, s.id as subject_id
+            FROM topics t
+            JOIN subjects s ON t.subject_id = s.id
+            WHERE t.id = %s
+        ''', (topic_id,))
+        topic = cur.fetchone()
+        
+        if not topic:
+            flash('Topic not found', 'danger')
+            return redirect('/subjects')
+        
+        # Get resources for this topic
+        cur.execute('''
+            SELECT r.*, u.name as uploaded_by_name
+            FROM resources r
+            LEFT JOIN users u ON r.uploaded_by = u.id
+            WHERE r.topic_id = %s
+            ORDER BY r.created_at DESC
+        ''', (topic_id,))
+        resources = cur.fetchall()
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('topic_detail.html', topic=topic, subject={'name': topic['subject_name'], 'id': topic['subject_id']}, resources=resources)
+
+@app.route('/add-link/<int:topic_id>', methods=['GET', 'POST'])
+@check_teacher_required
+def add_link(topic_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT t.*, s.name as subject_name
+            FROM topics t
+            JOIN subjects s ON t.subject_id = s.id
+            WHERE t.id = %s
+        ''', (topic_id,))
+        topic = cur.fetchone()
+        
+        if not topic:
+            flash('Topic not found', 'danger')
+            return redirect('/subjects')
+        
+        if request.method == 'POST':
+            title = request.form.get('title', '').strip()
+            description = request.form.get('description', '').strip()
+            resource_url = request.form.get('resource_url', '').strip()
+            
+            if not title or not resource_url:
+                flash('Title and URL are required', 'danger')
+                return redirect(f'/add-link/{topic_id}')
+            
+            cur.execute('''
+                INSERT INTO resources (title, description, resource_type, topic_id, uploaded_by, video_url)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (title, description, 'link', topic_id, session['user_id'], resource_url))
+            conn.commit()
+            flash('Link added successfully!', 'success')
+            return redirect(f'/topic/{topic_id}')
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+    
+    return render_template('add_link.html', topic=topic, topic_id=topic_id)
+
+# ======================================
 # PROFILE ROUTES
 # ======================================
 
@@ -1122,7 +1377,11 @@ def server_error(error):
 @app.before_request
 def before_request():
     """Initialize database and make user available to templates"""
-    init_db()
+    try:
+        init_db()
+    except Exception as e:
+        # Log error but don't crash the app
+        print(f"Database initialization skipped: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

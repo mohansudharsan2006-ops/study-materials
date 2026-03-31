@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Add Resource Link{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 animate-fade-in">
+                <div class="card-header bg-gradient-success text-white position-relative overflow-hidden">
+                    <div class="bg-pattern"></div>
+                    <h5 class="mb-0 position-relative z-index-1">
+                        <i class="fas fa-link me-2"></i>Add Resource Link
+                    </h5>
+                    {% if topic %}
+                    <small class="position-relative z-index-1 d-block mt-1">
+                        <i class="fas fa-folder me-1"></i>Topic: {{ topic['name'] }}
+                    </small>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    {% if session.get('role') not in ['teacher', 'admin'] %}
+                        <div class="alert alert-warning animate-slide-up" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Access Restricted:</strong> Only teachers can add resource links.
+                        </div>
+                    {% else %}
+                        <form method="POST" id="addLinkForm" class="animate-slide-up">
+                            <div class="mb-4">
+                                <label for="title" class="form-label fw-bold">
+                                    <i class="fas fa-heading me-1 text-primary"></i>Resource Title <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg animate-input-focus" id="title" name="title"
+                                       placeholder="e.g., Chapter 1 Study Guide" required>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>Name of the resource
+                                </small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="description" class="form-label fw-bold">
+                                    <i class="fas fa-align-left me-1 text-primary"></i>Description
+                                </label>
+                                <textarea class="form-control animate-input-focus" id="description" name="description"
+                                          rows="4" placeholder="Describe what this resource contains..."></textarea>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-lightbulb me-1"></i>Help students understand what they'll find in this resource
+                                </small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="resource_url" class="form-label fw-bold">
+                                    <i class="fas fa-globe me-1 text-primary"></i>Resource URL <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                    <input type="url" class="form-control form-control-lg animate-input-focus" id="resource_url"
+                                           name="resource_url" placeholder="https://example.com/resource" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="testUrlBtn">
+                                        <i class="fas fa-external-link-alt"></i> Test
+                                    </button>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>Direct link to the resource (PDF, DOC, YouTube, Google Drive, etc.)
+                                </small>
+                            </div>
+
+                            <div class="alert alert-info animate-fade-in" role="alert">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-check-circle me-2"></i>Supported Resources:
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li><i class="fas fa-file-pdf text-danger me-1"></i> PDF Documents</li>
+                                            <li><i class="fas fa-file-word text-primary me-1"></i> Google Docs/Sheets</li>
+                                            <li><i class="fab fa-youtube text-danger me-1"></i> YouTube Videos</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li><i class="fas fa-external-link-alt text-success me-1"></i> External websites</li>
+                                            <li><i class="fas fa-cloud text-info me-1"></i> Cloud storage</li>
+                                            <li><i class="fas fa-share text-warning me-1"></i> ShareMyNotes</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg px-4 animate-btn-hover">
+                                    <i class="fas fa-plus me-2"></i>Add Link
+                                </button>
+                                <a href="/topic/{{ topic_id }}" class="btn btn-outline-secondary btn-lg px-4 animate-btn-hover">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="mt-5 pt-4 border-top border-light">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>Tips for Adding Resources:
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="small text-muted">
+                                        <li><i class="fas fa-check text-success me-1"></i>Use descriptive titles</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Test URLs before adding</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Provide helpful descriptions</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="small text-muted">
+                                        <li><i class="fas fa-check text-success me-1"></i>Mix different resource types</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Ensure sharing permissions</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Keep resources current</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .bg-pattern {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+
+    .z-index-1 {
+        z-index: 1;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .animate-input-focus:focus {
+        animation: inputFocus 0.3s ease-out;
+    }
+
+    .animate-btn-hover:hover {
+        animation: btnHover 0.2s ease-out;
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes inputFocus {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes btnHover {
+        from { transform: translateY(0); }
+        to { transform: translateY(-2px); }
+    }
+
+    .card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    .alert-info {
+        border-left: 4px solid #17a2b8;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .input-group-text {
+        background: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    #testUrlBtn:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Test URL functionality
+    const testUrlBtn = document.getElementById('testUrlBtn');
+    const urlInput = document.getElementById('resource_url');
+
+    testUrlBtn.addEventListener('click', function() {
+        const url = urlInput.value.trim();
+        if (!url) {
+            alert('Please enter a URL first');
+            return;
+        }
+
+        // Show loading state
+        testUrlBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+        testUrlBtn.disabled = true;
+
+        // Simple URL validation and opening in new tab
+        try {
+            const urlObj = new URL(url);
+            window.open(url, '_blank');
+        } catch (e) {
+            alert('Invalid URL format');
+        }
+
+        // Reset button
+        setTimeout(() => {
+            testUrlBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Test';
+            testUrlBtn.disabled = false;
+        }, 1000);
+    });
+
+    // Form validation enhancement
+    const form = document.getElementById('addLinkForm');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const url = urlInput.value.trim();
+
+        if (!title || !url) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        // Show loading state on submit button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding Link...';
+        submitBtn.disabled = true;
+    });
+
+    // Auto-focus first input
+    document.getElementById('title').focus();
+});
+</script>

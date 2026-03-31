@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ subject['name'] }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ subject['name'] }}</h1>
+            <p class="text-muted"><strong>Code:</strong> {{ subject['code'] }}</p>
+            <p>{{ subject['description'] }}</p>
+        </div>
+        {% if session.get('role') in ['teacher', 'admin'] %}
+        <div class="col-md-4 text-right">
+            <a href="/topics/{{ subject['id'] }}" class="btn btn-primary btn-block mb-2">
+                <i class="fas fa-list"></i> Topics
+            </a>
+            <a href="/add-topic/{{ subject['id'] }}" class="btn btn-outline-primary btn-block mb-2">
+                <i class="fas fa-plus"></i> Add Topic
+            </a>
+            <a href="/upload-resource" class="btn btn-success btn-block">
+                <i class="fas fa-upload"></i> Upload Resource
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h3><i class="fas fa-list"></i> Topics</h3>
+            {% if topics %}
+            {% for topic in topics %}
+            <div class="card mb-3 border-left-primary">
+                <div class="card-body">
+                    <h5 class="card-title">{{ topic['name'] }}</h5>
+                    <p class="card-text text-muted">
+                        {{ topic['description'][:80] if topic['description'] else 'No description available.' }}
+                        {% if topic['description'] and topic['description']|length > 80 %}...{% endif %}
+                    </p>
+                    <a href="/topic/{{ topic['id'] }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-folder-open"></i> Open Topic
+                    </a>
+                    <small class="text-muted d-block mt-2">
+                        Created: {{ topic['created_at'][:10] if topic['created_at'] else 'N/A' }}
+                    </small>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-info">
+                No topics available yet
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            <h3><i class="fas fa-book"></i> Resources</h3>
+            {% if resources %}
+            {% for resource in resources %}
+            {% set resource_url = resource['video_url'] or ('/uploads/' ~ resource['file_path'] if resource['file_path'] else None) %}
+            <div class="card mb-3 border-left-danger">
+                <div class="card-body">
+                    <h5 class="card-title">{{ resource['title'] }}</h5>
+                    <p class="card-text text-muted">
+                        {{ resource['description'][:80] if resource['description'] else 'No description provided.' }}
+                        {% if resource['description'] and resource['description']|length > 80 %}...{% endif %}
+                    </p>
+                    {% if resource_url %}
+                    <a href="{{ resource_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-external-link-alt"></i> Open Resource
+                    </a>
+                    {% endif %}
+                    <small class="text-muted d-block mt-2">
+                        Added: {{ resource['created_at'][:10] if resource['created_at'] else 'N/A' }}
+                    </small>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-info">
+                No resources available yet
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-5 pt-3 border-top">
+        <a href="/subjects" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Subjects
+        </a>
+        <a href="/topics/{{ subject['id'] }}" class="btn btn-outline-primary">
+            <i class="fas fa-list"></i> View Topics
+        </a>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 4px solid #007bff !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+</style>
+{% endblock %}

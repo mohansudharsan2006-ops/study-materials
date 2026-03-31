@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Resources - StudyHub{% endblock %}
+{% block title %}Study Resources - StudyHub{% endblock %}
 
 {% block content %}
 <div class="container-lg my-5">
     <div class="row mb-4">
         <div class="col-md-8">
             <h1 class="mb-1"><i class="bi bi-file-earmark"></i> Study Resources</h1>
-            <p class="text-muted">Browse and download study materials</p>
+            <p class="text-muted">Browse public learning materials across all subjects</p>
         </div>
         {% if session.role in ['teacher', 'admin'] %}
         <div class="col-md-4 text-md-end">
@@ -21,6 +21,7 @@
     {% if resources %}
     <div class="row">
         {% for resource in resources %}
+        {% set resource_url = resource.video_url or ('/uploads/' ~ resource.file_path if resource.file_path else None) %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body">
@@ -33,24 +34,31 @@
                             <i class="bi bi-file-text text-info display-6"></i>
                         {% elif resource.resource_type == 'image' %}
                             <i class="bi bi-image text-success display-6"></i>
+                        {% elif resource.resource_type == 'link' %}
+                            <i class="bi bi-link-45deg text-warning display-6"></i>
                         {% else %}
                             <i class="bi bi-file-earmark display-6"></i>
                         {% endif %}
                     </div>
-                    
+
                     <h5 class="card-title">{{ resource.title }}</h5>
                     {% if resource.subject_name %}
                     <p class="card-text text-muted small">Subject: {{ resource.subject_name }}</p>
                     {% endif %}
-                    <p class="card-text small">{{ resource.description[:100] }}...</p>
-                    
+                    <p class="card-text small">
+                        {{ resource.description[:100] if resource.description else 'No description provided.' }}
+                        {% if resource.description and resource.description|length > 100 %}...{% endif %}
+                    </p>
+
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted">
-                            <i class="bi bi-download"></i> {{ resource.downloads }} downloads
-                        </small>
-                        <a href="/uploads/{{ resource.file_path }}" class="btn btn-sm btn-primary" download>
-                            Download
+                        <small class="text-muted">Uploaded by {{ resource.uploaded_by_name or 'Unknown' }}</small>
+                        {% if resource_url %}
+                        <a href="{{ resource_url }}" class="btn btn-sm btn-primary" target="_blank" rel="noopener noreferrer">
+                            Open
                         </a>
+                        {% else %}
+                        <span class="text-muted small">Unavailable</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -58,9 +66,20 @@
         {% endfor %}
     </div>
     {% else %}
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> No resources available yet.
-        </div>
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No resources available yet.
+    </div>
     {% endif %}
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+</style>
 {% endblock %}

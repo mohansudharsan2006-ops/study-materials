@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ topic['name'] }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ topic['name'] }}</h1>
+            <p class="text-muted">
+                <strong>Subject:</strong> <a href="/subject/{{ subject['id'] }}" class="text-decoration-none">{{ subject['name'] }}</a>
+            </p>
+            <p>{{ topic['description'] }}</p>
+        </div>
+        {% if session.get('role') in ['teacher', 'admin'] %}
+        <div class="col-md-4 text-right">
+            <a href="/add-link/{{ topic['id'] }}" class="btn btn-success btn-block mb-2">
+                <i class="fas fa-link"></i> Add Link
+            </a>
+            <a href="/topics/{{ subject['id'] }}" class="btn btn-info btn-block">
+                <i class="fas fa-list"></i> All Topics
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% if resources %}
+            <h3><i class="fas fa-book"></i> Learning Resources</h3>
+
+            <div class="table-responsive mb-5">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Added</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resource in resources %}
+                        {% set resource_url = resource['video_url'] or ('/uploads/' ~ resource['file_path'] if resource['file_path'] else None) %}
+                        <tr>
+                            <td>
+                                <strong>{{ resource['title'] }}</strong>
+                                <br>
+                                <small class="text-muted">{{ resource['uploaded_by_name'] or 'Unknown uploader' }}</small>
+                            </td>
+                            <td>
+                                {% set resource_type = resource['resource_type']|lower %}
+                                {% if resource_type == 'pdf' %}
+                                    <span class="badge badge-danger"><i class="fas fa-file-pdf"></i> PDF</span>
+                                {% elif resource_type in ['document', 'doc', 'docx'] %}
+                                    <span class="badge badge-primary"><i class="fas fa-file-word"></i> Document</span>
+                                {% elif resource_type == 'image' %}
+                                    <span class="badge badge-info"><i class="fas fa-image"></i> Image</span>
+                                {% elif resource_type == 'video' %}
+                                    <span class="badge badge-dark"><i class="fas fa-video"></i> Video</span>
+                                {% elif resource_type == 'link' %}
+                                    <span class="badge badge-warning"><i class="fas fa-link"></i> Link</span>
+                                {% else %}
+                                    <span class="badge badge-light"><i class="fas fa-file"></i> {{ resource_type|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ resource['description'][:50] if resource['description'] else 'No description provided.' }}
+                                {% if resource['description'] and resource['description']|length > 50 %}...{% endif %}
+                            </td>
+                            <td>{{ resource['created_at'][:10] if resource['created_at'] else 'N/A' }}</td>
+                            <td>
+                                {% if resource_url %}
+                                <a href="{{ resource_url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener noreferrer">
+                                    <i class="fas fa-external-link-alt"></i> Open
+                                </a>
+                                {% else %}
+                                <span class="text-muted small">Unavailable</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">No Resources Yet</h4>
+                <p>This topic doesn't have any resources. {% if session.get('role') in ['teacher', 'admin'] %}<a href="/add-link/{{ topic['id'] }}">Add the first resource</a>{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-5 pt-3 border-top">
+        <a href="/topics/{{ subject['id'] }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Topics
+        </a>
+        <a href="/subject/{{ subject['id'] }}" class="btn btn-outline-primary">
+            <i class="fas fa-book"></i> Subject Materials
+        </a>
+        <a href="/subjects" class="btn btn-outline-secondary">
+            <i class="fas fa-home"></i> All Subjects
+        </a>
+    </div>
+</div>
+
+<style>
+.table {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}
